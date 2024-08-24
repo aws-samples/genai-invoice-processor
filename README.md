@@ -1,11 +1,97 @@
-## My Project
+# Invoice Processing with Amazon Bedrock
+Managing invoices is a critical yet often cumbersome task for businesses of all sizes. The sheer volume of data, coupled with the need for accuracy and efficiency, can make invoice processing a significant challenge. This code repo provides a solution using Streamlit application and Bedrock Anthropic models to streamline and automate the process.
 
-TODO: Fill this README out!
+This project demonstrates how to process PDF invoices stored in an Amazon S3 bucket using AWS Bedrock. Amazon Bedrock is a fully managed service for building generative AI applications that gives access to range of LLM's. In this project, we will extract the invoice data and summarize the invoice and finally store in a JSON file. Alternatively, you can store this JSON and key value in your operational databases as required.
 
-Be sure to:
+## GenAI-powered invoice processing & review app
 
-* Change the title in this README
-* Edit your repository description on GitHub
+This application uses Amazon Bedrock Knowledge Base - Chat with document feature with Claude Sonnet LLM to extract information from pdf invoices and provides a streamlit app which displays the invoices and extracted information side-by-side for easier review. 
+
+## Prerequisites
+
+- Python 3.7 or later
+- AWS CLI installed and configured with appropriate credentials
+- Required Python packages (listed in `requirements.txt`)
+- Store invoices (PDF) to a S3 bucket. PUT IT INSIDE A FOLDER (e.g. invoice)
+
+## Create a S3 bucket to store the sample invoices via console or AWS CLI 
+
+1. Create Bucket - 
+    ```bash 
+        aws s3 mb s3://your-bucket-name --region your-region 
+        ```
+    - Replace your-bucket-name with the desired name of your S3 bucket.
+    - Replace your-region with the AWS region where you want the bucket to reside, such as us-east-1.
+
+2. Copy your invoices inside a folder - You can create a "folder" within the bucket by uploading a dummy or zero-byte file to a specified path. This path will include your desired prefix. For example, if you want to create a folder named invoices, you would upload a file to s3://your-bucket-name/invoices/.
+
+    ```bash
+        aws s3 cp /path/to/your/folder s3://your-bucket-name/folder/ --recursive
+        ```
+3. Validate the Upload
+    ```bash 
+        aws s3 ls s3://your-bucket-name/folder/ 
+        ```
+
+## Initiaing the project by cloning this repo
+
+1. Clone the repository:
+    - git clone https://github.com/aws-deep/genai-invoice-processor.git
+
+2. Navigate to the project directory:
+    - cd genai-invoice-processor
+
+3. Install the required Python packages:
+    - pip install -r requirements.txt
+
+
+## Steps to Run
+
+To process invoices stored in an S3 bucket, run the following command:
+
+### Step 1: Process invoices
+
+In this step we will process the invoices in S3 bucket and store the model output in the processes_invoice_output.json file. We are performing below 3 steps while processing the invoice:
+
+1. Extracting data from each invoice in key value format.
+2. Extracting only key infomation from the invoice required by our stakeholders.
+3. And finally summarize the invoice.
+
+You can check the prompt used in the invoices_processor.py file. And you can use different LLM's for all of these 3 steps.
+
+```bash
+python invoices_processor.py --bucket_name='<<replace this with the name of the s3 bucket>>' --prefix='<<replace with name of the folder>>'
+
+e.g. python invoices_processor.py --bucket_name='gen_ai_demo_bucket' --prefix='invoice'
+
+e.g. python invoices_processor.py --bucket_name='dk-genai-invoice-processing' --prefix='invoice'
+
+```
+After successful completion of the job, you should see a invoice folder in your local file system with all the s3 invoices. You will also see a processed_invoice_output.json file with all the metadata extracted by Amazon Bedrock Knowledge Base using Claude Sonnet Model.
+
+### Step 2: Review invoice data extracted by Amazon Bedrock
+
+![alt text](invoice-extractor.png)
+
+
+To review the processed invoice data, you can run the Streamlit app with the following command:
+
+```bash
+streamlit run review-invoice-data.py
+or 
+python -m streamlit run review-invoice-data.py
+```
+The Streamlit app will open in your default web browser, allowing you to view and interact with the processed invoice data.
+
+## Project Structure
+
+1. invoices_processor.py: The main script for processing invoices stored in an S3 bucket.
+
+2. review-invoice-data.py: The Streamlit app for reviewing the processed invoice data.
+
+3. requirements.txt: List of required Python packages.
+
+4. README.md: This file, containing project documentation.
 
 ## Security
 
@@ -14,4 +100,3 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 ## License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
-
