@@ -19,19 +19,22 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
 1. Create Bucket - 
     ```bash 
         aws s3 mb s3://your-bucket-name --region your-region 
-        ```
+    ```
     - Replace your-bucket-name with the desired name of your S3 bucket.
     - Replace your-region with the AWS region where you want the bucket to reside, such as us-east-1.
 
 2. Copy your invoices inside a folder - You can create a "folder" within the bucket by uploading a dummy or zero-byte file to a specified path. This path will include your desired prefix. For example, if you want to create a folder named invoices, you would upload a file to s3://your-bucket-name/invoices/.
 
+    ## TODO: QUESTION: why uploading to a folder in s3? it works without the folder too?
+
     ```bash
-        aws s3 cp /path/to/your/folder s3://your-bucket-name/folder/ --recursive
-        ```
+        aws s3 cp /path/to/your/folder s3://your-bucket-name/folder/ --recursive 
+    ```
+
 3. Validate the Upload
     ```bash 
         aws s3 ls s3://your-bucket-name/folder/ 
-        ```
+    ```
 
 ## Initiaing the project by cloning this repo
 

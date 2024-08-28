@@ -34,9 +34,6 @@ def display_invoice():
     invoice_filename = invoice_files[st.session_state.counter]
     invoice_file_path = os.path.join(local_download_folder, invoice_filename)
 
-    # Ensure the key format matches exactly with the JSON keys
-    invoice_key = os.path.join(local_download_folder, invoice_filename)  # Include folder path if needed
-
     # Display the PDF invoice
     with invoice:
         st.header("Invoice")
@@ -47,7 +44,7 @@ def display_invoice():
         st.header("Generated Data")
         try:
             # Extracting the three parts from the JSON data
-            detailed_text, json_string, summary_text = invoice_data[invoice_key]
+            detailed_text, json_string, summary_text = invoice_data[invoice_filename]
 
             st.subheader("Summary")
             st.write(summary_text)
