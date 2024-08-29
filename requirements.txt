@@ -4,3 +4,5 @@ argparse
 datetime
 streamlit_pdf_reader
 pyyaml
+boto3-stubs[s3]
+boto3-stubs[bedrock-runtime]
