@@ -60,7 +60,7 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
         # Mac/Linux:
         source venv/bin/activate
         # Windows:
-        venv/Scripts/activate # TODO: CHECK THIS WORKS
+        venv/Scripts/activate
     ```
 
 3. Install the required Python packages:
