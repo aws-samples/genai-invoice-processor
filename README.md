@@ -23,9 +23,13 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
     - Replace your-bucket-name with the desired name of your S3 bucket.
     - Replace your-region with the AWS region where you want the bucket to reside, such as us-east-1.
 
-2. Using the below AWS cli command, copy your invoices from your local computer to the S3 bucket created in the step above. 
+2. Using the below AWS cli command, copy your invoices from your local computer to the S3 bucket created in the step above. If you would like to create a folder within the S3 bucket and upload your invoices there, then follow the second command below.
     ```bash
         aws s3 cp /path/to/your/local/folder/with/invoices s3://your-bucket-name/ --recursive
+    ```
+
+        ```bash
+        aws s3 cp /path/to/your/local/folder/with/invoices s3://your-bucket-name/folder/ --recursive
     ```
 
 3. Validate the Upload
