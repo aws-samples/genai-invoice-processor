@@ -28,7 +28,7 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
         aws s3 cp /path/to/your/local/folder/with/invoices s3://your-bucket-name/ --recursive
     ```
 
-        ```bash
+    ```bash
         aws s3 cp /path/to/your/local/folder/with/invoices s3://your-bucket-name/folder/ --recursive
     ```
 
