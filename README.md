@@ -23,30 +23,54 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
     - Replace your-bucket-name with the desired name of your S3 bucket.
     - Replace your-region with the AWS region where you want the bucket to reside, such as us-east-1.
 
-2. Copy your invoices inside a folder - You can create a "folder" within the bucket by uploading a dummy or zero-byte file to a specified path. This path will include your desired prefix. For example, if you want to create a folder named invoices, you would upload a file to s3://your-bucket-name/invoices/.
-
-    ## TODO: QUESTION: why uploading to a folder in s3? it works without the folder too?
-
+2. Using the below AWS cli command, copy your invoices from your local computer to the S3 bucket created in the step above. 
     ```bash
-        aws s3 cp /path/to/your/folder s3://your-bucket-name/folder/ --recursive 
+        aws s3 cp /path/to/your/local/folder/with/invoices s3://your-bucket-name/ --recursive
     ```
 
 3. Validate the Upload
     ```bash 
-        aws s3 ls s3://your-bucket-name/folder/ 
+        aws s3 ls s3://your-bucket-name/ 
     ```
 
 ## Initiaing the project by cloning this repo
 
 1. Clone the repository:
-    - git clone https://github.com/aws-deep/genai-invoice-processor.git
+    ```bash 
+        git clone https://github.com/aws-samples/genai-invoice-processor.git
+    ```
 
 2. Navigate to the project directory:
-    - cd genai-invoice-processor
+    ```bash 
+        cd genai-invoice-processor
+    ```
+
+3. Upgrade Pip
+    ```bash 
+        python3 -m pip install --upgrade pip
+    ```
+
+4. (Optional) Create a new virtual environment to isolate the project dependencies
+    ```bash
+        python3 -m venv venv
+        # Mac/Linux:
+        source venv/bin/activate
+        # Windows:
+        venv/Scripts/activate # TODO: CHECK THIS WORKS
+    ```
 
 3. Install the required Python packages:
-    - pip install -r requirements.txt
+    ```bash
+        pip install -r requirements.txt
+    ```
 
+## Configuration
+
+This project uses a `config.yaml` file for configuration. Before running the application, ensure you've reviewed and updated this file as needed:
+
+- The file contains settings for AWS region and the Bedrock model ID.
+- The default model is set to Calude 3 Sonnet, you can find the model IDs on https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html
+- It also specifies the output file path and local download folder for invoices.
 
 ## Steps to Run
 
@@ -64,13 +88,15 @@ You can check the prompt used in the invoices_processor.py file. And you can use
 
 ```bash
 python invoices_processor.py --bucket_name='<<replace this with the name of the s3 bucket>>' --prefix='<<replace with name of the folder>>'
-
-e.g. python invoices_processor.py --bucket_name='gen_ai_demo_bucket' --prefix='invoice'
-
-e.g. python invoices_processor.py --bucket_name='dk-genai-invoice-processing' --prefix='invoice'
-
 ```
-After successful completion of the job, you should see a invoice folder in your local file system with all the s3 invoices. You will also see a processed_invoice_output.json file with all the metadata extracted by Amazon Bedrock Knowledge Base using Claude Sonnet Model.
+Examples:
+`python invoices_processor.py --bucket_name='gen_ai_demo_bucket' --prefix='invoice'`
+
+`python invoices_processor.py --bucket_name='dk-genai-invoice-processing' --prefix='invoice'`
+
+Note: The `--prefix` argument is optional. If omitted, the script will process all PDFs in the bucket root.
+
+After successful completion of the job, you should see a invoices folder in your local file system with all the s3 invoices. You will also see a processed_invoice_output.json file with all the metadata extracted by Amazon Bedrock Knowledge Base using Claude Sonnet Model.
 
 ### Step 2: Review invoice data extracted by Amazon Bedrock
 
@@ -81,7 +107,9 @@ To review the processed invoice data, you can run the Streamlit app with the fol
 
 ```bash
 streamlit run review-invoice-data.py
-or 
+```
+or
+```bash
 python -m streamlit run review-invoice-data.py
 ```
 The Streamlit app will open in your default web browser, allowing you to view and interact with the processed invoice data.
@@ -95,6 +123,8 @@ The Streamlit app will open in your default web browser, allowing you to view an
 3. requirements.txt: List of required Python packages.
 
 4. README.md: This file, containing project documentation.
+
+5. config.yaml: This contains the configuration for the AWS region, bedrock model and local folder/file structure to be used by both scripts
 
 ## Security
 
