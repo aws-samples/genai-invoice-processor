@@ -10,18 +10,18 @@ def load_invoice_data(file_path):
 def get_invoice_files(folder):
     return sorted([f for f in os.listdir(folder) if f.endswith('.pdf')])
 
-def display_invoice_data(invoice_data, invoice_filename):
+def display_invoice_data(invoice_data_catalog, invoice_filename):
     try:
-        detailed_text, json_string, summary_text = invoice_data[invoice_filename]
+        invoice_data = invoice_data_catalog[invoice_filename]
         
         st.subheader("Summary")
-        st.write(summary_text)
+        st.write(invoice_data["summary"])
         
         st.subheader("Structured Data")
-        st.json(json.loads(json_string))
+        st.json(json.loads(invoice_data["structured"]))
         
         st.subheader("Detailed Text")
-        st.text(detailed_text)
+        st.text(invoice_data["full"])
     except KeyError:
         st.error(f"Data for {invoice_filename} not found.")
     except Exception as e:
@@ -30,7 +30,7 @@ def display_invoice_data(invoice_data, invoice_filename):
 def main():
     st.set_page_config(layout="wide")
     
-    local_download_folder = "invoice"
+    local_download_folder = "invoices"
     invoice_data_file = "processed_invoice_output.json"
     
     invoice_data = load_invoice_data(invoice_data_file)
