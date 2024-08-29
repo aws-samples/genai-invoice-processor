@@ -72,7 +72,9 @@ def main() -> None:
     
     # Load processed invoice data and get list of invoice files
     invoice_data = load_invoice_data(CONFIG['processing']['output_file'])
-    invoice_files = get_invoice_files(CONFIG['processing']['local_download_folder'])
+    invoice_files = [key for key in invoice_data.keys()]
+    # checking that for each invoice with data in the output file, it has the actual invoice stored in the local download folder
+    assert all([os.path.exists(os.path.join(os.getcwd(), CONFIG['processing']['local_download_folder'], file)) for file in invoice_files])
     
     # Initialize or use existing counter for navigation
     if 'counter' not in st.session_state:
