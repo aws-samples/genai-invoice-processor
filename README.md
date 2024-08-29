@@ -88,17 +88,20 @@ In this step we will process the invoices in S3 bucket and store the model outpu
 2. Extracting only key infomation from the invoice required by our stakeholders.
 3. And finally summarize the invoice.
 
-You can check the prompt used in the invoices_processor.py file. And you can use different LLM's for all of these 3 steps.
+You can check the prompts used in the invoices_processor.py file. And you can use different LLM's for all of these 3 steps.
 
 ```bash
 python invoices_processor.py --bucket_name='<<replace this with the name of the s3 bucket>>' --prefix='<<replace with name of the folder>>'
 ```
+**Note:** The `--prefix` argument is optional. If omitted, the script will process all PDFs in the bucket root.
+
+
 Examples:
 `python invoices_processor.py --bucket_name='gen_ai_demo_bucket' --prefix='invoice'`
 
 `python invoices_processor.py --bucket_name='dk-genai-invoice-processing' --prefix='invoice'`
 
-Note: The `--prefix` argument is optional. If omitted, the script will process all PDFs in the bucket root.
+
 
 After successful completion of the job, you should see a invoices folder in your local file system with all the s3 invoices. You will also see a processed_invoice_output.json file with all the metadata extracted by Amazon Bedrock Knowledge Base using Claude Sonnet Model.
 
