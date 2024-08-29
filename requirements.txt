@@ -3,3 +3,4 @@ streamlit
 argparse
 datetime
 streamlit_pdf_reader
+pyyaml

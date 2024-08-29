@@ -5,16 +5,17 @@ import shutil
 import argparse
 import time
 import datetime
+import yaml
 from typing import Dict, Any
 
-# Constants
-REGION_NAME = 'us-west-2'
-MODEL_ID = "anthropic.claude-3-sonnet-20240229-v1:0"
-OUTPUT_FILE = "processed_invoice_output.json"
-LOCAL_DOWNLOAD_FOLDER = "invoices"
+def load_config():
+    with open('config.yaml', 'r') as file:
+        return yaml.safe_load(file)
 
-# Input prompts
-INPUT_PROMPT = "Extract data from attached invoice in key-value format."
+CONFIG = load_config()
+
+# prompts
+FULL_INPUT_PROMPT = "Extract data from attached invoice in key-value format."
 
 STRUCTURED_INPUT_PROMPT = """
 Process the pdf invoice and list all metadata and values in json format. Then process the details in json and do following:
@@ -35,12 +36,13 @@ SUMMARY_PROMPT = "Process the pdf invoice and summarize the invoice under 3 line
 
 def initialize_aws_clients():
     return (
-        boto3.client('s3'),
-        boto3.client(service_name='bedrock-agent-runtime', region_name=REGION_NAME)
+        boto3.client('s3', region_name=CONFIG['aws']['region_name']),
+        boto3.client(service_name='bedrock-agent-runtime', 
+                     region_name=CONFIG['aws']['region_name'])
     )
 
 def retrieve_and_generate(bedrock_client, input_prompt: str, document_s3_uri: str) -> Dict[str, Any]:
-    model_arn = f'arn:aws:bedrock:{REGION_NAME}::foundation-model/{MODEL_ID}'
+    model_arn = f'arn:aws:bedrock:{CONFIG["aws"]["region_name"]}::foundation-model/{CONFIG["aws"]["model_id"]}'
     return bedrock_client.retrieve_and_generate(
         input={'text': input_prompt},
         retrieveAndGenerateConfiguration={
@@ -59,22 +61,26 @@ def retrieve_and_generate(bedrock_client, input_prompt: str, document_s3_uri: st
 
 def process_invoice(s3_client, bedrock_client, bucket_name: str, pdf_file_key: str) -> Dict[str, Any]:
     document_uri = f"s3://{bucket_name}/{pdf_file_key}"
-    local_file_path = os.path.join(LOCAL_DOWNLOAD_FOLDER, pdf_file_key)
+    local_file_path = os.path.join(CONFIG['processing']['local_download_folder'], pdf_file_key)
 
     os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
     s3_client.download_file(bucket_name, pdf_file_key, local_file_path)
 
     results = {}
-    for prompt_name, prompt in [("full", INPUT_PROMPT), ("structured", STRUCTURED_INPUT_PROMPT), ("summary", SUMMARY_PROMPT)]:
+    for prompt_name, prompt in [
+        ("full", FULL_INPUT_PROMPT),
+        ("structured", STRUCTURED_INPUT_PROMPT),
+        ("summary", SUMMARY_PROMPT)
+    ]:
         response = retrieve_and_generate(bedrock_client, prompt, document_uri)
         results[prompt_name] = response['output']['text']
 
     return results
 
 def batch_process_s3_bucket_invoices(s3_client, bedrock_client, bucket_name: str, prefix: str = "") -> int:
-    if os.path.exists(LOCAL_DOWNLOAD_FOLDER):
-        shutil.rmtree(LOCAL_DOWNLOAD_FOLDER)
-    os.makedirs(LOCAL_DOWNLOAD_FOLDER)
+    if os.path.exists(CONFIG['processing']['local_download_folder']):
+        shutil.rmtree(CONFIG['processing']['local_download_folder'])
+    os.makedirs(CONFIG['processing']['local_download_folder'])
 
     processed_invoices = 0
     results = {}
@@ -100,7 +106,7 @@ def batch_process_s3_bucket_invoices(s3_client, bedrock_client, bucket_name: str
             break
         continuation_token = response.get('NextContinuationToken')
 
-    with open(OUTPUT_FILE, 'w') as file:
+    with open(CONFIG['processing']['output_file'], 'w') as file:
         json.dump(results, file, indent=4)
 
     return processed_invoices
@@ -108,7 +114,7 @@ def batch_process_s3_bucket_invoices(s3_client, bedrock_client, bucket_name: str
 def main():
     parser = argparse.ArgumentParser(description="Batch process PDF invoices from an S3 bucket.")
     parser.add_argument('--bucket_name', required=True, type=str, help="The name of the S3 bucket.")
-    parser.add_argument('--prefix', type=str, default="", help="S3 bucket folder (prefix) where invoices are stored.") # optional input
+    parser.add_argument('--prefix', type=str, default="", help="S3 bucket folder (prefix) where invoices are stored.")
     args = parser.parse_args()
 
     s3_client, bedrock_client = initialize_aws_clients()

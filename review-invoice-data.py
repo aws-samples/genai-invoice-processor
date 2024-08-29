@@ -2,6 +2,13 @@ import json
 import streamlit as st
 import os
 from streamlit_pdf_reader import pdf_reader
+import yaml
+
+def load_config():
+    with open('config.yaml', 'r') as file:
+        return yaml.safe_load(file)
+
+CONFIG = load_config()
 
 def load_invoice_data(file_path):
     with open(file_path, 'r') as file:
@@ -15,8 +22,9 @@ def display_invoice_data(invoice_data_catalog, invoice_filename):
         invoice_data = invoice_data_catalog[invoice_filename]
         
         st.subheader("Summary")
-        st.write(invoice_data["summary"])
-        
+        st.write(invoice_data["summary"]) # TODO: this renders the summary as markdown and there are characters in the text which render the text as italics, etc
+                                            # need to fix this
+
         st.subheader("Structured Data")
         st.json(json.loads(invoice_data["structured"]))
         
@@ -30,11 +38,8 @@ def display_invoice_data(invoice_data_catalog, invoice_filename):
 def main():
     st.set_page_config(layout="wide")
     
-    local_download_folder = "invoices"
-    invoice_data_file = "processed_invoice_output.json"
-    
-    invoice_data = load_invoice_data(invoice_data_file)
-    invoice_files = get_invoice_files(local_download_folder)
+    invoice_data = load_invoice_data(CONFIG['processing']['output_file'])
+    invoice_files = get_invoice_files(CONFIG['processing']['local_download_folder'])
     
     if 'counter' not in st.session_state:
         st.session_state.counter = 0
@@ -50,7 +55,7 @@ def main():
             st.session_state.counter += 1
     
     invoice_filename = invoice_files[st.session_state.counter]
-    invoice_file_path = os.path.join(local_download_folder, invoice_filename)
+    invoice_file_path = os.path.join(CONFIG['processing']['local_download_folder'], invoice_filename)
     
     invoice, data = st.columns([3, 2])
     
