@@ -1,6 +1,22 @@
 aws:
   region_name: us-west-2
   model_id: anthropic.claude-3-sonnet-20240229-v1:0
+  prompts:
+    full: Extract data from attached invoice in key-value format.
+    structured: |
+        Process the pdf invoice and list all metadata and values in json format. Then process the details in json and do following:
+        Format your analysis as a JSON object in following structure:
+        {
+        "Vendor": "<Amazon>",
+        "InvoiceDate":"<DD-MM-YYYY formatted invoice date>",
+        "StartDate":"<DD-MM-YYYY formatted service start date>",
+        "EndDate":"<DD-MM-YYYY formatted service end date>",
+        "CurrencyCode":"<Currency code based on the symbol and vendor details>",
+        "TotalAmountDue":"<100.90>"
+        "Description":"<Concise summary of the invoice description within 20 words>"
+        }
+        Please proceed with the analysis based on the above instructions. Please don't state "Based on the .."
+    summary: Process the pdf invoice and summarize the invoice under 3 lines
 
 processing:
   output_file: processed_invoice_output.json

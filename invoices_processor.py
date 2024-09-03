@@ -21,27 +21,6 @@ def load_config():
 
 CONFIG = load_config()
 
-# Prompts for different types of invoice analysis
-# These prompts are used to instruct the AI model on how to process the invoices
-FULL_INPUT_PROMPT = "Extract data from attached invoice in key-value format."
-
-STRUCTURED_INPUT_PROMPT = """
-Process the pdf invoice and list all metadata and values in json format. Then process the details in json and do following:
-Format your analysis as a JSON object in following structure:
-{
-"Vendor": "<Amazon>",
-"InvoiceDate":"<DD-MM-YYYY formatted invoice date>",
-"StartDate":"<DD-MM-YYYY formatted service start date>",
-"EndDate":"<DD-MM-YYYY formatted service end date>",
-"CurrencyCode":"<Currency code based on the symbol and vendor details>",
-"TotalAmountDue":"<100.90>"
-"Description":"<Concise summary of the invoice description within 20 words>"
-}
-Please proceed with the analysis based on the above instructions. Please don't state "Based on the .."
-"""
-
-SUMMARY_PROMPT = "Process the pdf invoice and summarize the invoice under 3 lines"
-
 def initialize_aws_clients() -> Tuple[S3Client, BedrockRuntimeClient]:
     """
     Initialize and return AWS S3 and Bedrock clients.
@@ -106,12 +85,8 @@ def process_invoice(s3_client: S3Client, bedrock_client: BedrockRuntimeClient, b
 
     # Process invoice with different prompts
     results = {}
-    for prompt_name, prompt in [
-        ("full", FULL_INPUT_PROMPT),
-        ("structured", STRUCTURED_INPUT_PROMPT),
-        ("summary", SUMMARY_PROMPT)
-    ]:
-        response = retrieve_and_generate(bedrock_client, prompt, document_uri)
+    for prompt_name in ["full", "structured","summary"]:
+        response = retrieve_and_generate(bedrock_client, CONFIG['aws']['prompts'][prompt_name], document_uri)
         results[prompt_name] = response['output']['text']
 
     return results
