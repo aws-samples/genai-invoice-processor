@@ -51,8 +51,7 @@ def display_invoice_data(invoice_data_catalog: Dict[str, Dict[str, str]], invoic
         invoice_data = invoice_data_catalog[invoice_filename]
         
         st.subheader("Summary")
-        st.write(invoice_data["summary"]) # TODO: this renders the summary as markdown and there are characters in the text which render the text as italics, etc
-                                            # need to fix this
+        st.write(invoice_data["summary"].replace("$", "\\$"))
 
         st.subheader("Structured Data")
         st.json(json.loads(invoice_data["structured"]))
