@@ -122,12 +122,13 @@ def batch_process_s3_bucket_invoices(s3_client: S3Client, bedrock_client: Bedroc
 
         for obj in response.get('Contents', []):
             pdf_file_key = obj['Key']
-            try:
-                results[pdf_file_key] = process_invoice(s3_client, bedrock_client, bucket_name, pdf_file_key)
-                processed_invoices += 1
-                print(f"Processed file: s3://{bucket_name}/{pdf_file_key}")
-            except Exception as e:
-                print(f"Failed to process s3://{bucket_name}/{pdf_file_key}: {str(e)}")
+            if pdf_file_key.lower().endswith('.pdf'): # this will skip the folder key as that is not a file and does not need to be processed
+                try:
+                    results[pdf_file_key] = process_invoice(s3_client, bedrock_client, bucket_name, pdf_file_key)
+                    processed_invoices += 1
+                    print(f"Processed file: s3://{bucket_name}/{pdf_file_key}")
+                except Exception as e:
+                    print(f"Failed to process s3://{bucket_name}/{pdf_file_key}: {str(e)}")
 
         if not response.get('IsTruncated'):
             break
