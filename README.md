@@ -13,6 +13,7 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
 - AWS CLI installed and configured with appropriate credentials
 - Required Python packages (listed in `requirements.txt`)
 - Store invoices (PDF) to a S3 bucket. PUT IT INSIDE A FOLDER (e.g. invoice)
+- Set your region in the config.yaml file
 
 ## Create a S3 bucket to store the sample invoices via console or AWS CLI 
 
@@ -91,7 +92,7 @@ In this step we will process the invoices in S3 bucket and store the model outpu
 You can check the prompts used in the invoices_processor.py file. And you can use different LLM's for all of these 3 steps.
 
 ```bash
-python invoices_processor.py --bucket_name='<<replace this with the name of the s3 bucket>>' --prefix='<<replace with name of the folder>>'
+python invoices_processor.py --bucket_name='your-bucket-name' --prefix='your-folder'
 ```
 **Note:** The `--prefix` argument is optional. If omitted, the script will process all PDFs in the bucket root.
 
@@ -99,11 +100,8 @@ python invoices_processor.py --bucket_name='<<replace this with the name of the 
 Examples:
 `python invoices_processor.py --bucket_name='gen_ai_demo_bucket' --prefix='invoice'`
 
-`python invoices_processor.py --bucket_name='dk-genai-invoice-processing' --prefix='invoice'`
 
-
-
-After successful completion of the job, you should see a invoices folder in your local file system with all the s3 invoices. You will also see a processed_invoice_output.json file with all the metadata extracted by Amazon Bedrock Knowledge Base using Claude Sonnet Model.
+After successful completion of the job, you should see a invoices folder in your local file system with all the invoices. You will also see a processed_invoice_output.json file with all the metadata extracted by Amazon Bedrock Knowledge Base using Claude Sonnet Model.
 
 ### Step 2: Review invoice data extracted by Amazon Bedrock
 
