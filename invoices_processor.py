@@ -7,9 +7,10 @@ import time
 import datetime
 import yaml
 from typing import Dict, Any, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
 from mypy_boto3_bedrock_runtime.client import BedrockRuntimeClient
 from mypy_boto3_s3.client import S3Client
-
 
 # Load configuration from YAML file
 def load_config():
@@ -20,6 +21,7 @@ def load_config():
         return yaml.safe_load(file)
 
 CONFIG = load_config()
+write_lock = Lock()  # Lock for managing concurrent writes to the output file
 
 def initialize_aws_clients() -> Tuple[S3Client, BedrockRuntimeClient]:
     """
@@ -85,11 +87,33 @@ def process_invoice(s3_client: S3Client, bedrock_client: BedrockRuntimeClient, b
 
     # Process invoice with different prompts
     results = {}
-    for prompt_name in ["full", "structured","summary"]:
+    for prompt_name in ["full", "structured", "summary"]:
         response = retrieve_and_generate(bedrock_client, CONFIG['aws']['prompts'][prompt_name], document_uri)
         results[prompt_name] = response['output']['text']
 
     return results
+
+def write_to_json_file(output_file: str, data: Dict[str, Any]):
+    """
+    Write the given data to the JSON output file, augmenting it incrementally.
+    
+    Args:
+        output_file (str): Path to the JSON output file
+        data (Dict[str, Any]): Data to write to the output file
+    """
+    with write_lock:  # Ensure that only one thread writes at a time
+        if os.path.exists(output_file):
+            # Load existing data and update
+            with open(output_file, 'r') as file:
+                existing_data = json.load(file)
+        else:
+            existing_data = {}
+
+        existing_data.update(data)
+
+        # Write updated data back to the file
+        with open(output_file, 'w') as file:
+            json.dump(existing_data, file, indent=4)
 
 def batch_process_s3_bucket_invoices(s3_client: S3Client, bedrock_client: BedrockRuntimeClient, bucket_name: str, prefix: str = "") -> int:
     """
@@ -108,11 +132,10 @@ def batch_process_s3_bucket_invoices(s3_client: S3Client, bedrock_client: Bedroc
     shutil.rmtree(CONFIG['processing']['local_download_folder'], ignore_errors=True)
     os.makedirs(CONFIG['processing']['local_download_folder'], exist_ok=True)
 
-    processed_invoices = 0
-    results = {}
+    # Prepare to iterate through all objects in the S3 bucket
+    continuation_token = None  # Pagination handling
+    pdf_file_keys = []
 
-    # Iterate through all objects in S3 bucket
-    continuation_token = None # Pagination handling
     while True:
         list_kwargs = {'Bucket': bucket_name, 'Prefix': prefix}
         if continuation_token:
@@ -122,23 +145,33 @@ def batch_process_s3_bucket_invoices(s3_client: S3Client, bedrock_client: Bedroc
 
         for obj in response.get('Contents', []):
             pdf_file_key = obj['Key']
-            if pdf_file_key.lower().endswith('.pdf'): # this will skip the folder key as that is not a file and does not need to be processed
-                try:
-                    results[pdf_file_key] = process_invoice(s3_client, bedrock_client, bucket_name, pdf_file_key)
-                    processed_invoices += 1
-                    print(f"Processed file: s3://{bucket_name}/{pdf_file_key}")
-                except Exception as e:
-                    print(f"Failed to process s3://{bucket_name}/{pdf_file_key}: {str(e)}")
+            if pdf_file_key.lower().endswith('.pdf'):  # Skip folders or non-PDF files
+                pdf_file_keys.append(pdf_file_key)
 
         if not response.get('IsTruncated'):
             break
         continuation_token = response.get('NextContinuationToken')
 
-    # Save results to output file
-    with open(CONFIG['processing']['output_file'], 'w') as file:
-        json.dump(results, file, indent=4)
+    # Process invoices in parallel
+    processed_count = 0
+    with ThreadPoolExecutor() as executor:
+        future_to_key = {
+            executor.submit(process_invoice, s3_client, bedrock_client, bucket_name, pdf_file_key): pdf_file_key
+            for pdf_file_key in pdf_file_keys
+        }
 
-    return processed_invoices
+        for future in as_completed(future_to_key):
+            pdf_file_key = future_to_key[future]
+            try:
+                result = future.result()
+                # Write result to the JSON output file as soon as it's available
+                write_to_json_file(CONFIG['processing']['output_file'], {pdf_file_key: result})
+                processed_count += 1
+                print(f"Processed file: s3://{bucket_name}/{pdf_file_key}")
+            except Exception as e:
+                print(f"Failed to process s3://{bucket_name}/{pdf_file_key}: {str(e)}")
+
+    return processed_count
 
 def main():
     """
