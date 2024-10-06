@@ -9,64 +9,68 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
 
 ## Prerequisites
 
-- Python 3.7 or later
+- Python 3.7 or later on your local machine
 - AWS CLI installed and configured with appropriate credentials
-- Required Python packages (listed in `requirements.txt`)
-- Store invoices (PDF) to a S3 bucket. PUT IT INSIDE A FOLDER (e.g. invoice)
-- Set your region in the config.yaml file
+    - Set the region to where you would like to run this invoice processor by following the Set up AWS Credentials and Region for Development documentation.
+    Note: The region must have Bedrock and Anthropic Claude 3 Sonnet model available.
+- Access to foundation model Anthropic Claude 3 Sonnet on Amazon Bedrock in the region chosen
+- Invoices that you want to process
 
-## Create a S3 bucket to store the sample invoices via console or AWS CLI 
+## Install dependencies and clone repo
 
-1. Create Bucket - 
-    ```bash 
-        aws s3 mb s3://your-bucket-name --region your-region 
-    ```
-    - Replace your-bucket-name with the desired name of your S3 bucket.
-    - Replace your-region with the AWS region where you want the bucket to reside, such as us-east-1.
-
-2. Using the below AWS cli command, copy your invoices from your local computer to the S3 bucket created in the step above. If you would like to create a folder within the S3 bucket and upload your invoices there, then follow the second command below.
+1. Clone Github repository
     ```bash
-        aws s3 cp /path/to/your/local/folder/with/invoices s3://your-bucket-name/ --recursive
-    ```
-
-    ```bash
-        aws s3 cp /path/to/your/local/folder/with/invoices s3://your-bucket-name/folder/ --recursive
-    ```
-
-3. Validate the Upload
-    ```bash 
-        aws s3 ls s3://your-bucket-name/ 
-    ```
-
-## Initiaing the project by cloning this repo
-
-1. Clone the repository:
-    ```bash 
         git clone https://github.com/aws-samples/genai-invoice-processor.git
     ```
 
 2. Navigate to the project directory:
-    ```bash 
-        cd genai-invoice-processor
+    ```bash
+        cd </path/to/your/folder>/genai-invoice-processor
     ```
 
-3. Upgrade Pip
-    ```bash 
-        python3 -m pip install --upgrade pip
+3. Upgrade pip
+    ```bash
+        python3 -m pip install -–upgrade pip
     ```
-
-4. (Optional) Create a new virtual environment to isolate the project dependencies
+4. (Optionally) create a virtual environment to isolate dependencies:
     ```bash
         python3 -m venv venv
-        # Mac/Linux:
-        source venv/bin/activate
-        # Windows:
-        venv/Scripts/activate
     ```
+    
+    Activate the virtual environment:
+        Mac/Linux: `source venv/bin/activate`
+        Windows: `venv/Scripts/activate`
 
-3. Install the required Python packages:
+
+
+6. Install the necessary Python packages:
     ```bash
         pip install -r requirements.txt
+    ```
+
+7. Update the `region` in the config.yaml file to the same region set for your AWS CLI where Bedrock and Anthropic Claude 3 Sonnet model is available. 
+
+## Create a S3 bucket to store the invoices via console or AWS CLI 
+
+1. Create Bucket - 
+    ```bash 
+        aws s3 mb s3://<your-bucket-name> --region <your-region>
+    ```
+    - Replace your-bucket-name with the desired name of your S3 bucket.
+    - Replace your-region with the AWS region set for your AWS CLI and in config.yaml, such as us-east-1.
+
+2. Using the below AWS cli command, copy your invoices from your local computer to the S3 bucket created in the step above. If you would like to create a folder within the S3 bucket and upload your invoices there, then follow the second command below.
+    ```bash
+        aws s3 cp </path/to/your/local/folder/with/invoices> s3://<your-bucket-name>/ --recursive
+    ```
+
+    ```bash
+        aws s3 cp </path/to/your/local/folder/with/invoices> s3://<your-bucket-name>/<folder>/ --recursive
+    ```
+
+3. Validate the Upload
+    ```bash 
+        aws s3 ls s3://<your-bucket-name>/ 
     ```
 
 ## Configuration
@@ -92,12 +96,14 @@ In this step we will process the invoices in S3 bucket and store the model outpu
 You can check the prompts used in the invoices_processor.py file. And you can use different LLM's for all of these 3 steps.
 
 ```bash
-python invoices_processor.py --bucket_name='your-bucket-name' --prefix='your-folder'
+python invoices_processor.py --bucket_name='<your-bucket-name>' --prefix='<your-folder>'
 ```
-**Note:** The `--prefix` argument is optional. If omitted, the script will process all PDFs in the bucket root.
+**Note:** The `--prefix` argument is optional. If omitted, the script will process all PDFs in the bucket.
 
 
 Examples:
+`python invoices_processor.py --bucket_name='gen_ai_demo_bucket'`
+
 `python invoices_processor.py --bucket_name='gen_ai_demo_bucket' --prefix='invoice'`
 
 
