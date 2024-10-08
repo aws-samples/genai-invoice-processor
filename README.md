@@ -1,11 +1,11 @@
 # Invoice Processing with Amazon Bedrock
 Managing invoices is a critical yet often cumbersome task for businesses of all sizes. The sheer volume of data, coupled with the need for accuracy and efficiency, can make invoice processing a significant challenge. This code repo provides a solution using Streamlit application and Bedrock Anthropic models to streamline and automate the process.
 
-This project demonstrates how to process PDF invoices stored in an Amazon S3 bucket using AWS Bedrock. Amazon Bedrock is a fully managed service for building generative AI applications that gives access to range of LLM's. In this project, we will extract the invoice data and summarize the invoice and finally store in a JSON file. Alternatively, you can store this JSON and key value in your operational databases as required.
+This project demonstrates how to process PDF invoices stored in an Amazon S3 bucket using Amazon Bedrock. Amazon Bedrock is a fully managed service for building generative AI applications that gives access to range of LLM's. In this project, we will extract the invoice data and summarize the invoice and finally store in a JSON file. Alternatively, you can store this JSON and key value in your operational databases as required.
 
 ## GenAI-powered invoice processing & review app
 
-This application uses Amazon Bedrock Knowledge Base - Chat with document feature with Claude Sonnet LLM to extract information from pdf invoices and provides a streamlit app which displays the invoices and extracted information side-by-side for easier review. 
+This application uses Amazon Bedrock Knowledge Base - Chat with document feature with Anthrophic Claude Sonnet LLM to extract information from pdf invoices and provides a streamlit app which displays the invoices and extracted information side-by-side for easier review. 
 
 ## Prerequisites
 
