@@ -12,16 +12,17 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
 - Python 3.7 or later on your local machine
 - AWS CLI installed and [configured with appropriate credentials](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html)
     - Set the region to where you would like to run this invoice processor by following the Set up AWS Credentials and Region for Development documentation.
-    Note: The region must have Bedrock and Anthropic Claude 3 Sonnet model available. You can check it [here](https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html).
+    
+    **Note:** The region must have Bedrock and Anthropic Claude 3 Sonnet model available. You can check it [here](https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html).
 - Access to foundation model Anthropic Claude 3 Sonnet on Amazon Bedrock in the region chosen
 - Invoices that you want to process
 
 ## Install dependencies and clone repo
 
 1. Clone Github repository
-```bash
-git clone https://github.com/aws-samples/genai-invoice-processor.git
-```
+    ```bash
+    git clone https://github.com/aws-samples/genai-invoice-processor.git
+    ```
 
 2. Navigate to the project directory:
     ```bash
@@ -30,22 +31,24 @@ git clone https://github.com/aws-samples/genai-invoice-processor.git
 
 3. Upgrade pip
     ```bash
-        python3 -m pip install -–upgrade pip
+    python3 -m pip install -–upgrade pip
     ```
 4. (Optionally) create a virtual environment to isolate dependencies:
     ```bash
-        python3 -m venv venv
+    python3 -m venv venv
     ```
     
     Activate the virtual environment:
+
         Mac/Linux: `source venv/bin/activate`
+
         Windows: `venv/Scripts/activate`
 
 
 
 6. Install the necessary Python packages:
     ```bash
-        pip install -r requirements.txt
+    pip install -r requirements.txt
     ```
 
 7. Update the `region` in the config.yaml file to the same region set for your AWS CLI where Bedrock and Anthropic Claude 3 Sonnet model is available. 
@@ -54,23 +57,23 @@ git clone https://github.com/aws-samples/genai-invoice-processor.git
 
 1. Create Bucket - 
     ```bash 
-        aws s3 mb s3://<your-bucket-name> --region <your-region>
+    aws s3 mb s3://<your-bucket-name> --region <your-region>
     ```
     - Replace your-bucket-name with the desired name of your S3 bucket.
     - Replace your-region with the AWS region set for your AWS CLI and in config.yaml, such as us-east-1.
 
 2. Using the below AWS cli command, copy your invoices from your local computer to the S3 bucket created in the step above. If you would like to create a folder within the S3 bucket and upload your invoices there, then follow the second command below.
     ```bash
-        aws s3 cp </path/to/your/local/folder/with/invoices> s3://<your-bucket-name>/ --recursive
+    aws s3 cp </path/to/your/local/folder/with/invoices> s3://<your-bucket-name>/ --recursive
     ```
 
     ```bash
-        aws s3 cp </path/to/your/local/folder/with/invoices> s3://<your-bucket-name>/<folder>/ --recursive
+    aws s3 cp </path/to/your/local/folder/with/invoices> s3://<your-bucket-name>/<folder>/ --recursive
     ```
 
 3. Validate the Upload
     ```bash 
-        aws s3 ls s3://<your-bucket-name>/ 
+    aws s3 ls s3://<your-bucket-name>/ 
     ```
 
 ## Configuration
