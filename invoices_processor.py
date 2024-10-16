@@ -183,6 +183,9 @@ def main():
     parser.add_argument('--prefix', type=str, default="", help="S3 bucket folder (prefix) where invoices are stored.")
     args = parser.parse_args()
 
+    if os.path.exists(CONFIG['processing']['output_file']):
+        os.remove(CONFIG['processing']['output_file'])
+
     s3_client, bedrock_client = initialize_aws_clients()
 
     start_time = time.time()
