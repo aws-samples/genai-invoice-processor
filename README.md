@@ -10,22 +10,22 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
 ## Prerequisites
 
 - Python 3.7 or later on your local machine
-- AWS CLI installed and configured with appropriate credentials
+- AWS CLI installed and [configured with appropriate credentials](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html)
     - Set the region to where you would like to run this invoice processor by following the Set up AWS Credentials and Region for Development documentation.
-    Note: The region must have Bedrock and Anthropic Claude 3 Sonnet model available.
+    Note: The region must have Bedrock and Anthropic Claude 3 Sonnet model available. You can check it [here](https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html).
 - Access to foundation model Anthropic Claude 3 Sonnet on Amazon Bedrock in the region chosen
 - Invoices that you want to process
 
 ## Install dependencies and clone repo
 
 1. Clone Github repository
-    ```bash
-        git clone https://github.com/aws-samples/genai-invoice-processor.git
-    ```
+```bash
+git clone https://github.com/aws-samples/genai-invoice-processor.git
+```
 
 2. Navigate to the project directory:
     ```bash
-        cd </path/to/your/folder>/genai-invoice-processor
+    cd </path/to/your/folder>/genai-invoice-processor
     ```
 
 3. Upgrade pip
