@@ -39,10 +39,10 @@ This application uses Amazon Bedrock Knowledge Base - Chat with document feature
     ```
     
     Activate the virtual environment:
-
-        Mac/Linux: `source venv/bin/activate`
-
-        Windows: `venv/Scripts/activate`
+    
+    Mac/Linux: `source venv/bin/activate`
+    
+    Windows: `venv/Scripts/activate`
 
 
 
